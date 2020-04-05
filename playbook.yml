@@ -1,0 +1,97 @@
+-
+    name: 'Stop the web services on web server nodes'
+    hosts: web_nodes
+    tasks:
+        -
+            name: 'Stop the web services on web server nodes'
+            command: 'service httpd stop'
+-
+    name: 'Stop the database service on db server nodes'
+    hosts: db_nodes
+    tasks:
+        -
+            name: 'Stop the database service on db server nodes'
+            command: 'service mysql stop'
+-
+    name: 'Restart all servers'
+    hosts: all_nodes
+    tasks:
+        -
+            name: 'Restart all servers'
+            command: '/sbin/shutdown -r'
+-
+    name: 'Start database service'
+    hosts: db_nodes
+    tasks:
+        -
+            name: 'Start web services on web server nodes'
+            command: 'service mysql start'
+-
+    name: 'Start webservice on all web server nodes'
+    hosts: web_nodes
+    tasks:
+        -
+            name: 'start web service on webservers'
+            command: 'service httpd start'
+-
+   name: 'Execute script on all web server nodes'
+   hosts: web_nodes
+   tasks:
+       -
+          name: 'Execute script on all web server nodes'
+          script: /tmp/install_script.sh
+-
+    name: 'Execute a script on all web server nodes and start httpd service'
+    hosts: web_nodes
+    tasks:
+        -
+            name: 'Update entry into /etc/resolv.conf'
+            lineinfile:
+                path: /etc/resolv.conf
+                line: 'nameserver 10.1.250.10'
+        -
+            name: 'Add a new user'
+            user:
+                name: web_user
+                uid: 1040
+                group: developers
+        -
+            name: 'Execute a script'
+            script: /tmp/install_script.sh
+        -
+            name: 'Start httpd service'
+            service:
+                name: httpd
+                state: present
+-
+    name: 'Update nameserver entry into resolv.conf file on localhost'
+    hosts: localhost
+    tasks:
+        -
+            name: 'Update nameserver entry into resolv.conf file'
+            lineinfile:
+                path: /etc/resolv.conf
+                line: 'nameserver {{ nameserver_ip }}'
+        -
+            name: 'Disable SNMP Port'
+            firewalld:
+                port: '{{ snmp_port }}'
+                permanent: true
+                state: disabled
+-
+    name: 'Update nameserver entry into resolv.conf file on localhost'
+    hosts: localhost
+    vars:
+        car_model: "BMW M3"
+        country_name: "USA"
+        title: "Systems Engineer"
+    tasks:
+        -
+            name: 'Print my car model'
+            command: 'echo "My car''s model is {{ car_model }}"'
+        -
+            name: 'Print my country'
+            command: 'echo "I live in the {{ country_name }}"'
+        -
+            name: 'Print my title'
+            command: 'echo "I work as a {{ title }}"'
